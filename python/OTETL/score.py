@@ -83,8 +83,6 @@ def transform_data():
 		dataframe = disease_target_pairs.iloc[index + 1:].copy()
 		dataframe['targetId1'] = row['targetId']
 		target_target_pairs = pandas.concat([target_target_pairs, dataframe], ignore_index=True)
-		if index > 10:
-			break
 	logger.debug(f'\n{target_target_pairs}')
 
 	target_target_grouped = target_target_pairs.groupby(['targetId1', 'targetId'], group_keys=True)
