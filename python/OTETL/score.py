@@ -17,6 +17,13 @@ data_out_path = module_path.joinpath('data/out')
 
 
 def load_data_folder(path, filter_cols):
+	"""
+	Load all json files in a given path into a dataframe, filtering to select only filter_cols
+
+	:param path: The path to search for json files to load
+	:param filter_cols: The columns to select from the loaded json data
+	:return: pandas.DataFrame containing all the loaded data
+	"""
 	files = sorted(path.glob('**/*.json'))
 	data = pandas.read_json(files.pop(), lines=True).filter(items=filter_cols)
 	for child in files:
@@ -27,6 +34,19 @@ def load_data_folder(path, filter_cols):
 
 
 def transform_data():
+	"""
+	Perform the following on Open Targets Data
+
+	1. Load the Diseases dataset into a pandas.DataFrame selecting id and name columns
+	2. Load the Targets dataset into a pandas.DataFrame selecting id and approvedSymbol columns
+	3. Load the EVA Evidence dataset into a pandas.DataFrame selecting diseaseId, targetId, and score columns
+	4. Group the EVA Evidence by diseaseId, targetId pairs and create a new column containing a list of the grouped scores
+	5. Create a new column containing the median of the scores
+	6. Create a new column containing the top 3 scores
+	7. Join the disease and targets datasets to add disease name and target symbol columns
+	8. Sort by the median column
+	9. Save the dataframe to a json file in the output directory
+	"""
 	disease_filter_cols = ['id', 'name']
 	diseases = load_data_folder(disease_path, disease_filter_cols)
 	logger.debug(f'\n{diseases}')
