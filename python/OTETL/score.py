@@ -76,6 +76,23 @@ def transform_data():
 	with open(out_filepath, 'w', encoding='utf-8') as f:
 		json.dump(parsed, f, ensure_ascii=False, indent=4)
 
+	disease_target_pairs = eva.drop(columns=['score'])
+	target_target_pairs = pandas.DataFrame()
+	for index, row in disease_target_pairs.iterrows():
+		logger.debug(f'\n{index}')
+		dataframe = disease_target_pairs.iloc[index + 1:].copy()
+		dataframe['targetId1'] = row['targetId']
+		target_target_pairs = pandas.concat([target_target_pairs, dataframe], ignore_index=True)
+		if index > 10:
+			break
+	logger.debug(f'\n{target_target_pairs}')
+
+	target_target_grouped = target_target_pairs.groupby(['targetId1', 'targetId'], group_keys=True)
+	count_frame = target_target_grouped.nunique().reset_index(names=['targetId1', 'targetId'])
+	logger.debug(f'\n{count_frame}')
+	count = count_frame[count_frame['diseaseId'] > 1].shape[0]
+	logger.info(f'{count} target-target pairs share a connection to at least two diseases')
+
 
 if __name__ == '__main__':
 	import datetime
