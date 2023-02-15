@@ -16,7 +16,7 @@ eva_path = evidence_path.joinpath('sourceId=eva')
 data_out_path = module_path.joinpath('data/out')
 
 
-def load_data_folder(path, filter_cols):
+def load_data_folder(path: Path, filter_cols: list[str]) -> pandas.DataFrame:
 	"""
 	Load all json files in a given path into a dataframe, filtering to select only filter_cols
 
@@ -24,11 +24,11 @@ def load_data_folder(path, filter_cols):
 	:param filter_cols: The columns to select from the loaded json data
 	:return: pandas.DataFrame containing all the loaded data
 	"""
-	files = sorted(path.glob('**/*.json'))
-	data = pandas.read_json(files.pop(), lines=True).filter(items=filter_cols)
+	files: list = sorted(path.glob('**/*.json'))
+	data: pandas.DataFrame = pandas.read_json(files.pop(), lines=True).filter(items=filter_cols)
 	for child in files:
 		logger.info(f'Processing file {child}')
-		dataframe = pandas.read_json(child, lines=True).filter(items=filter_cols)
+		dataframe: pandas.DataFrame = pandas.read_json(child, lines=True).filter(items=filter_cols)
 		data = pandas.concat([data, dataframe], ignore_index=True)
 	return data
 
@@ -47,31 +47,31 @@ def transform_data():
 	8. Sort by the median column
 	9. Save the dataframe to a json file in the output directory
 	"""
-	disease_filter_cols = ['id', 'name']
-	diseases = load_data_folder(disease_path, disease_filter_cols)
+	disease_filter_cols: list[str] = ['id', 'name']
+	diseases: pandas.DataFrame = load_data_folder(disease_path, disease_filter_cols)
 	logger.debug(f'\n{diseases}')
 
-	target_filter_cols = ['id', 'approvedSymbol']
-	targets = load_data_folder(target_path, target_filter_cols)
+	target_filter_cols: list[str] = ['id', 'approvedSymbol']
+	targets: pandas.DataFrame = load_data_folder(target_path, target_filter_cols)
 	logger.debug(f'\n{targets}')
 
-	eva_filter_cols = ['diseaseId', 'targetId', 'score']
-	eva = load_data_folder(eva_path, eva_filter_cols)
+	eva_filter_cols: list[str] = ['diseaseId', 'targetId', 'score']
+	eva: pandas.DataFrame = load_data_folder(eva_path, eva_filter_cols)
 	logger.debug(f'\n{eva}')
 
 	grouped = eva.groupby(['diseaseId', 'targetId'], group_keys=True)
 
-	score_list = grouped['score'].apply(list).to_frame('scorelist').reset_index(names=['diseaseId', 'targetId'])
+	score_list: pandas.DataFrame = grouped['score'].apply(list).to_frame('scorelist').reset_index(names=['diseaseId', 'targetId'])
 	score_list['median'] = score_list['scorelist'].apply(median)
 	score_list['top3'] = score_list['scorelist'].apply(lambda x: nlargest(3, x))
 
-	disease_join = score_list.join(diseases.set_index('id'), on='diseaseId')
-	joined = disease_join.join(targets.set_index('id'), on='targetId')
+	disease_join: pandas.DataFrame = score_list.join(diseases.set_index('id'), on='diseaseId')
+	joined: pandas.DataFrame = disease_join.join(targets.set_index('id'), on='targetId')
 
 	logger.debug(f"\n{joined}")
 
 	data_out_path.mkdir(parents=True, exist_ok=True)
-	out_filepath = data_out_path.joinpath('data.json')
+	out_filepath: Path = data_out_path.joinpath('data.json')
 	parsed = json.loads(joined.drop(columns=['scorelist']).sort_values(by=['median']).to_json(orient="index"))
 	with open(out_filepath, 'w', encoding='utf-8') as f:
 		json.dump(parsed, f, ensure_ascii=False, indent=4)
@@ -79,7 +79,7 @@ def transform_data():
 
 if __name__ == '__main__':
 	import datetime
-	now_string = datetime.datetime.now().isoformat().replace(':', '.')
+	now_string: str = datetime.datetime.now().isoformat().replace(':', '.')
 
 	log_path.mkdir(parents=True, exist_ok=True)
 	console = logging.StreamHandler()
