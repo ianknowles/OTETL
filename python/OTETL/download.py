@@ -22,6 +22,7 @@ release_path = '/pub/databases/opentargets/platform/21.11/output/etl/json'
 
 
 def download():
+	"""Download the EVA Evidence, Disease and Target datasets"""
 	with FTP(ftp_url) as ftp:
 		ftp.login()
 		logger.info(f'Logged into {ftp_url}')
@@ -32,6 +33,7 @@ def download():
 
 
 def download_full_evidence():
+	"""Download all the available evidence datasets"""
 	with FTP(ftp_url) as ftp:
 		ftp.login()
 		logger.info(f'Logged into {ftp_url}')
@@ -40,6 +42,7 @@ def download_full_evidence():
 
 
 def download_subfolders(ftp, local_path, remote_path):
+	"""Download the contents of FTP subfolders, found at remote_path, to local_path"""
 	try:
 		ftp.cwd(remote_path)
 		folders = ftp.nlst()
@@ -54,6 +57,7 @@ def download_subfolders(ftp, local_path, remote_path):
 
 
 def download_folder(ftp, local_path, remote_path):
+	"""Download the contents of an FTP folder, found at remote_path, to local_path"""
 	local_path.mkdir(parents=True, exist_ok=True)
 	try:
 		ftp.cwd(remote_path)
