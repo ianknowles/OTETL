@@ -15,6 +15,8 @@ evidence_path = data_in_path.joinpath('evidence')
 eva_path = evidence_path.joinpath('sourceId=eva')
 data_out_path = module_path.joinpath('data/out')
 
+logger = logging.getLogger(__name__)
+
 
 def load_data_folder(path: Path, filter_cols: list[str]) -> pandas.DataFrame:
 	"""
@@ -100,7 +102,6 @@ if __name__ == '__main__':
 	console = logging.StreamHandler()
 	logfile = logging.FileHandler(filename=log_path.joinpath(f'{now_string}_score.log'))
 	logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', encoding='utf-8', level=logging.DEBUG, handlers=[console,logfile])
-	logger = logging.getLogger(__name__)
 
 	pandas.set_option('display.max_columns', None)
 
